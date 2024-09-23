@@ -40,7 +40,7 @@ With hooks, this becomes a bit more complicated. Since hooks run "inline" to a c
 
 ## Issue with linking parents
 
-Say we track owners every component, and we rely those owner to be "linked" back. The problem here is that parent <> child don't link with the try...finally pattern, but hooks do:
+Say we track owners every component, and we rely those owner to be "linked" back. This way, we can pass the trigger down to children owners. The problem here is that parent <> child don't link with the try...finally pattern, but hooks do:
 
 ```
          App   -> useApp (^App)
