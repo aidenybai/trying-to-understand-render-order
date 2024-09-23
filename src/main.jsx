@@ -6,9 +6,15 @@ let danglingTriggers = [];
 
 const markTrigger = (name) => {
   if (owner) owner.trigger = owner.name;
-  danglingTriggers.push(name);
+  if (name) {
+    danglingTriggers.push(name);
+  }
 };
 
+/**
+ * This is a workaround if the owner doesn't exist but we know it has been triggered (marked in markTrigger).
+ * This is supported in main anya but not here
+ */
 const revalidateDanglingTriggers = () => {
   for (let i = danglingTriggers.length - 1; i >= 0; i--) {
     let trigger = danglingTriggers[i];
@@ -32,13 +38,15 @@ const trackComponent = (name, fn) => {
       trigger: parentOwner?.trigger,
     };
     revalidateDanglingTriggers();
-    let ret = fn(...args);
-    log(name);
-    if (parentOwner && owner?.trigger && name.startsWith('use')) {
-      parentOwner.trigger = owner.trigger;
+    try {
+      return fn(...args);
+    } finally {
+      log(name);
+      if (parentOwner && owner?.trigger && name.startsWith('use')) {
+        parentOwner.trigger = owner.trigger;
+      }
+      owner = parentOwner;
     }
-    owner = parentOwner;
-    return ret;
   };
 };
 
@@ -59,7 +67,7 @@ export const useState2 = trackComponent('useState2', (initialState) => {
     state,
     (newValue) => {
       setState(newValue);
-      markTrigger('useState1');
+      markTrigger('useState2');
     },
   ];
 });
